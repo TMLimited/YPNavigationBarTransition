@@ -51,19 +51,38 @@ SOFTWARE.
     if (configure.transparent) {
         barBackgroundView.alpha = 0;
         self.translucent = YES;
-        [self setBackgroundImage:transpanrentImage forBarMetrics:UIBarMetricsDefault];
+        
+        if (@available(iOS 15.0, *)) {
+            UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+            [appearance configureWithTransparentBackground];
+            appearance.shadowColor = [UIColor clearColor];
+            self.standardAppearance = appearance;
+            self.scrollEdgeAppearance = appearance;
+        } else {
+            [self setBackgroundImage:transpanrentImage forBarMetrics:UIBarMetricsDefault];
+            self.shadowImage = configure.shadowImage ? nil : transpanrentImage;
+        }
     } else {
         barBackgroundView.alpha = 1;
         self.translucent = configure.translucent;
-        UIImage* backgroundImage = configure.backgroundImage;
-        if (!backgroundImage && configure.backgroundColor) {
-            backgroundImage = [UIImage yp_imageWithColor:configure.backgroundColor];
-        }
         
-        [self setBackgroundImage:backgroundImage forBarMetrics:UIBarMetricsDefault];
+        if (@available(iOS 15.0, *)) {
+            UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+            [appearance configureWithOpaqueBackground];
+            appearance.backgroundColor = configure.backgroundColor;
+            appearance.shadowColor = [UIColor clearColor];
+            self.standardAppearance = appearance;
+            self.scrollEdgeAppearance = appearance;
+        } else {
+            UIImage* backgroundImage = configure.backgroundImage;
+            if (!backgroundImage && configure.backgroundColor) {
+                backgroundImage = [UIImage yp_imageWithColor:configure.backgroundColor];
+            }
+            
+            [self setBackgroundImage:backgroundImage forBarMetrics:UIBarMetricsDefault];
+            self.shadowImage = configure.shadowImage ? nil : transpanrentImage;
+        }
     }
-    
-    self.shadowImage = configure.shadowImage ? nil : transpanrentImage;
     
     [self setCurrentBarConfigure:configure];
 }
